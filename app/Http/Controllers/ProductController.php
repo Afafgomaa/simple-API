@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\product;
 use Illuminate\Http\Request;
+
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\productCollection;
+use App\Http\Requests\ProductRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
@@ -13,9 +17,16 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+     public function __construct()
+     {
+       $this->middleware('auth:api')->except('index', 'show');
+     }
     public function index()
     {
-        return product::all();
+      //  return new productCollection(product::all());
+        return productCollection::collection(product::paginate(20));
     }
 
     /**
@@ -34,9 +45,19 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+      $product = new product;
+      $product->name = $request->name ;
+      $product->detail = $request->description;
+      $product->price = $request->price;
+      $product->discount = $request->discount;
+      $product->stock = $request->stock;
+
+      $product->save();
+        return response([
+          'data' => new ProductResource($product)
+        ],Response::HTTP_CREATED) ;
     }
 
     /**
@@ -70,7 +91,13 @@ class ProductController extends Controller
      */
     public function update(Request $request, product $product)
     {
-        //
+      $request['detail'] = $request->description;
+      unset($request['description']);
+      $product->update($request->all());
+      return response([
+        'data' => new ProductResource($product)
+      ],Response::HTTP_CREATED) ;
+
     }
 
     /**

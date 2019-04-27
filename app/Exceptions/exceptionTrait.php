@@ -20,12 +20,12 @@ trait exceptionTrait
         if ($this->ishttp($e)) {
           return $this->resopnseHttp();
         }
-            return parent::render($request, $exception);
+            return parent::render($r, $e);
   }
 
 
 
-  
+
 
   protected function isModel($e)
   {
